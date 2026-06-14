@@ -2,6 +2,7 @@
 
 from src.raguard import CanaryMiddleware
 
+
 def main():
     # Initialize middleware
     canary = CanaryMiddleware(stealth_mode=False)
@@ -10,7 +11,7 @@ def main():
     # 1. Simulate retrieval
     retrieved_docs = [
         "Confidential: The Q3 revenue target is $5,000,000.",
-        "Internal: The new API key is sk-1234567890."
+        "Internal: The new API key is sk-1234567890.",
     ]
 
     # 2. Inject canary tokens
@@ -36,6 +37,7 @@ def main():
         print("✅ Response is safe to return to user.\n")
     else:
         print("❌ Response blocked due to canary token detection.\n")
+
 
 if __name__ == "__main__":
     main()

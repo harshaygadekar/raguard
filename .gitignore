@@ -34,5 +34,13 @@ ENV/
 .ruff_cache/
 .mypy_cache/
 
-#md files
+# Internal/agent markdown files (not for public consumers)
+# User-facing docs are explicitly un-ignored below.
 *.md
+
+# Keep user-facing docs tracked
+!README.md
+!CONTRIBUTING.md
+!SECURITY.md
+!CODE_OF_CONDUCT.md
+!docs/**/*.md

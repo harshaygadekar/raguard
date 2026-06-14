@@ -14,22 +14,28 @@ authors = [
 ]
 dependencies = [
     "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
 ]
 
 [project.optional-dependencies]
-langchain = ["langchain>=0.1.0"]
-llamaindex = ["llama-index>=0.10.0"]
+langchain = ["langchain-core>=0.1.0,<1.0"]
+llamaindex = ["llama-index>=0.10.0,<1.0"]
 fastapi = ["fastapi>=0.100.0"]
+redis = ["redis>=4.5.0"]
 dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-benchmark>=4.0.0",
+    "hypothesis>=6.0.0",
     "ruff>=0.1.0",
     "mypy>=1.5.0",
-    "langchain>=0.1.0",
-    "llama-index>=0.10.0",
+    "langchain-core>=0.1.0,<1.0",
+    "langchain>=0.1.0,<1.0",
+    "llama-index>=0.10.0,<1.0",
     "fastapi>=0.100.0",
-    "httpx>=0.25.0",
-    "pytest-cov>=4.1.0",
+    "fakeredis>=2.21.0",
+    "pre-commit>=3.6.0",
 ]
 
 [tool.ruff]
@@ -41,6 +47,8 @@ select = ["E", "F", "I", "N", "W", "B", "C4", "UP"]
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = "src"
+explicit_package_bases = true
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -48,3 +56,4 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "--cov=src/raguard --cov-report=term-missing --cov-fail-under=85"
