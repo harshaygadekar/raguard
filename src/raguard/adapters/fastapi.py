@@ -183,6 +183,19 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
         # Non-streaming (or decode_response enabled): full-buffer scan
         body = await self._read_response_body(response)
 
+        # Guard against abnormally large responses to prevent OOM
+        max_bytes = self.raguard.config.max_scan_body_bytes
+        if len(body) > max_bytes:
+            logger.warning(
+                "RAGuard: Response body (%d bytes) exceeds max_scan_body_bytes "
+                "(%d) — passing through unscanned for session '%s'",
+                len(body),
+                max_bytes,
+                session_id,
+            )
+            self.raguard.clear_session(session_id)
+            return self._rebuild_response(response, body)
+
         try:
             text = body.decode("utf-8")
         except UnicodeDecodeError:

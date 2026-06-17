@@ -632,3 +632,86 @@ class TestAsyncGracefulDegradation:
         )
         with pytest.raises(RuntimeError, match="store down"):
             await mw.is_safe_async("response", "s1")
+
+
+# --- Max Scan Body Bytes ---
+
+
+class TestMaxScanBodyBytes:
+    """max_scan_body_bytes config validation."""
+
+    def test_default_is_1mb(self):
+        config = RAGuardConfig()
+        assert config.max_scan_body_bytes == 1_048_576
+
+    def test_custom_value_accepted(self):
+        config = RAGuardConfig(max_scan_body_bytes=2_000_000)
+        assert config.max_scan_body_bytes == 2_000_000
+
+    def test_minimum_enforced(self):
+        with pytest.raises(ValidationError):
+            RAGuardConfig(max_scan_body_bytes=512)  # type: ignore[arg-type]
+
+    def test_env_var_override(self, monkeypatch):
+        monkeypatch.setenv("RAGUARD_MAX_SCAN_BODY_BYTES", "5000")
+        config = RAGuardConfig()
+        assert config.max_scan_body_bytes == 5000
+
+
+# --- JSON Logging ---
+
+
+class TestJSONLogging:
+    """Structured JSON logging opt-in."""
+
+    def test_json_logging_default_off(self):
+        config = RAGuardConfig()
+        assert config.json_logging is False
+
+    def test_json_logging_configurable(self):
+        config = RAGuardConfig(json_logging=True)
+        assert config.json_logging is True
+
+    def test_json_formatter_output(self):
+        """JSON formatter produces valid JSON with expected keys."""
+        import logging
+
+        from src.raguard.core import _JSONFormatter
+
+        formatter = _JSONFormatter()
+        record = logging.LogRecord(
+            name="raguard.core",
+            level=logging.WARNING,
+            pathname="core.py",
+            lineno=1,
+            msg="Exfiltration detected for session '%s'",
+            args=("user_123",),
+            exc_info=None,
+        )
+        output = formatter.format(record)
+        parsed = json.loads(output)
+        assert parsed["level"] == "WARNING"
+        assert parsed["logger"] == "raguard.core"
+        assert "user_123" in parsed["message"]
+        assert "timestamp" in parsed
+
+    def test_json_logging_configures_handler(self):
+        """When json_logging=True, the raguard logger gets a JSON handler."""
+        import logging
+
+        import src.raguard.core as core_module
+        from src.raguard.core import _JSONFormatter
+
+        # Reset the idempotency guard so we can test
+        original = core_module._JSON_LOGGING_CONFIGURED
+        core_module._JSON_LOGGING_CONFIGURED = False
+        try:
+            CanaryMiddleware(json_logging=True)
+            raguard_logger = logging.getLogger("raguard")
+            assert any(
+                isinstance(h.formatter, _JSONFormatter)
+                for h in raguard_logger.handlers
+            )
+        finally:
+            core_module._JSON_LOGGING_CONFIGURED = original
+

@@ -106,6 +106,25 @@ class RAGuardConfig(BaseSettings):
         ),
     )
 
+    max_scan_body_bytes: int = Field(
+        default=1_048_576,
+        ge=1024,
+        description=(
+            "Maximum response body size (bytes) the FastAPI adapter will buffer "
+            "for scanning. Responses exceeding this are passed through unscanned. "
+            "Default: 1MB."
+        ),
+    )
+
+    json_logging: bool = Field(
+        default=False,
+        description=(
+            "If True, configures the 'raguard' logger to emit structured JSON "
+            "lines. Useful for production log aggregators (Datadog, ELK, "
+            "CloudWatch). If False, uses standard Python log formatting."
+        ),
+    )
+
     @field_validator("injection_position")
     @classmethod
     def validate_injection_position(cls, v: str) -> str:

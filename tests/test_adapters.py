@@ -575,6 +575,62 @@ class TestFastAPIAdapter:
         assert "[" in data["outer"]["inner_list"][0]
         assert "[" in data["outer"]["inner_list"][1]["deep_dict"]
 
+    def test_scan_path_exceeds_max_scan_body_bytes(self) -> None:
+        """Responses exceeding max_scan_body_bytes bypass scanning and pass through."""
+        from typing import Any
+
+        from starlette.applications import Starlette
+        from starlette.responses import JSONResponse
+        from starlette.routing import Route
+        from starlette.testclient import TestClient
+
+        from src.raguard.adapters.fastapi import RAGuardFastAPIMiddleware
+        from src.raguard.config import RAGuardConfig
+
+        middleware_instance = CanaryMiddleware(
+            config=RAGuardConfig(max_scan_body_bytes=1024)
+        )
+
+        async def retrieve(request: Any) -> JSONResponse:
+            return JSONResponse({"doc": "Secret"})
+
+        async def generate(request: Any) -> JSONResponse:
+            # Get the token
+            tokens = middleware_instance._store.get_tokens("test_session_large")
+            token = tokens[0] if tokens else "abc"
+            large_body = "x" * 2000 + f" Leaked: {token}"
+            return JSONResponse({"response": large_body})
+
+        app = Starlette(
+            routes=[
+                Route("/api/retrieve", retrieve),
+                Route("/api/generate", generate),
+            ]
+        )
+        app.add_middleware(
+            RAGuardFastAPIMiddleware,
+            middleware=middleware_instance,
+            inject_paths=[r"/api/retrieve"],
+            scan_paths=[r"/api/generate"],
+        )
+
+        client = TestClient(app)
+
+        # First inject tokens
+        client.get("/api/retrieve", headers={"X-Session-ID": "test_session_large"})
+
+        # Try to leak - should pass through instead of 403 because it's too large
+        response = client.get(
+            "/api/generate", headers={"X-Session-ID": "test_session_large"}
+        )
+
+        assert response.status_code == 200
+        assert "Leaked:" in response.json()["response"]
+
+        # Verify session is cleaned up
+        assert not middleware_instance._store.get_tokens("test_session_large")
+
+
 
 # ============================================================================
 # TestFastAPIStreamingAdapter

@@ -3,6 +3,11 @@
 Defines the TokenStore protocol and provides InMemoryTokenStore as the
 default implementation. For multi-process deployments (gunicorn workers,
 Kubernetes pods), provide a custom TokenStore backed by Redis or similar.
+
+Scaling guidance for InMemoryTokenStore:
+  - Suitable for single-process deployments and up to ~50k concurrent sessions.
+  - For multi-worker setups, use RedisTokenStore (``pip install "raguard[redis]"``).
+  - Call ``clear_session()`` after each request cycle to bound memory usage.
 """
 
 from __future__ import annotations
