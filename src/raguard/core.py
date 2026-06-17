@@ -41,6 +41,9 @@ class CanaryMiddleware:
         self._cb_last_failure_time: float = 0.0
         # Metrics
         self._metrics = _MetricsCollector()
+        # Structured JSON logging (opt-in)
+        if self.config.json_logging:
+            _configure_json_logging()
 
     @property
     def metrics(self) -> RAGuardMetrics:
@@ -382,6 +385,44 @@ class CanaryMiddleware:
         Prevents unbounded growth of token store in long-running processes.
         """
         self._store.clear_session(session_id)
+
+
+class _JSONFormatter(logging.Formatter):
+    """Emit log records as single-line JSON objects."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        return json.dumps(
+            {
+                "timestamp": datetime.fromtimestamp(
+                    record.created, tz=timezone.utc
+                ).isoformat(),
+                "level": record.levelname,
+                "logger": record.name,
+                "message": record.getMessage(),
+            },
+            default=str,
+        )
+
+
+# ponytail: idempotent — safe to call multiple times (checks for sentinel attr)
+_JSON_LOGGING_CONFIGURED = False
+
+
+def _configure_json_logging() -> None:
+    """Attach a JSON formatter to the ``raguard`` logger hierarchy.
+
+    Replaces existing handlers on the ``raguard`` root logger with a single
+    StreamHandler emitting JSON lines. Idempotent.
+    """
+    global _JSON_LOGGING_CONFIGURED  # noqa: PLW0603
+    if _JSON_LOGGING_CONFIGURED:
+        return
+    _JSON_LOGGING_CONFIGURED = True
+
+    root = logging.getLogger("raguard")
+    handler = logging.StreamHandler()
+    handler.setFormatter(_JSONFormatter())
+    root.handlers = [handler]
 
 
 class _StoreProxy:
