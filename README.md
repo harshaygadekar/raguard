@@ -1,5 +1,9 @@
 # RAGuard
 
+[![CI](https://github.com/harshaygadekar/raguard/actions/workflows/ci.yml/badge.svg)](https://github.com/harshaygadekar/raguard/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **Deterministic security middleware for RAG applications.**
 
 RAGuard protects Retrieval-Augmented Generation (RAG) systems from context exfiltration via indirect prompt injection. It acts as a deterministic "tripwire" by injecting unique, session-specific canary tokens into retrieved context and scanning LLM outputs for their presence.
@@ -34,6 +38,13 @@ pip install "raguard[llamaindex]"
 # FastAPI integration
 pip install "raguard[fastapi]"
 ```
+
+> **⚠️ Production Deployment Note:** The default `InMemoryTokenStore` is single-process only. If you run multiple workers (e.g., Gunicorn, Kubernetes pods), tokens stored in one worker's memory are invisible to others. For multi-worker deployments, use `RedisTokenStore`:
+> ```python
+> from raguard import CanaryMiddleware, RedisTokenStore
+> store = RedisTokenStore(redis_url="redis://localhost:6379/0")
+> middleware = CanaryMiddleware(store=store)
+> ```
 
 ---
 
@@ -162,6 +173,12 @@ RAGuard is **not** a complete RAG security solution. It does not protect against
 
 *   **Tokenizer Normalization:** Certain LLM APIs may strip zero-width characters during input preprocessing. Use the default alphanumeric mode if your LLM provider enforces aggressive Unicode normalization.
 *   **Streaming + Decode Response:** When `decode_response=True`, the FastAPI adapter must buffer the full response body. Streaming scan (`text/event-stream`) is only available when `decode_response=False`.
+
+> **🔒 Security Note:** `decode_response` defaults to `False` for performance. This means encoded exfiltration attempts (Base64, ROT13, hex) will **not** be detected unless you explicitly enable it:
+> ```python
+> middleware = CanaryMiddleware(decode_response=True)
+> ```
+> Enable this if your threat model includes attackers who may instruct the LLM to encode leaked context.
 
 ---
 
