@@ -631,7 +631,6 @@ class TestFastAPIAdapter:
         assert not middleware_instance._store.get_tokens("test_session_large")
 
 
-
 # ============================================================================
 # TestFastAPIStreamingAdapter
 # ============================================================================
@@ -683,9 +682,7 @@ class TestFastAPIStreamingAdapter:
         client.get("/api/retrieve", headers={"X-Session-ID": "stream_safe"})
 
         # Stream safe response
-        response = client.get(
-            "/api/generate", headers={"X-Session-ID": "stream_safe"}
-        )
+        response = client.get("/api/generate", headers={"X-Session-ID": "stream_safe"})
 
         assert response.status_code == 200
         assert "chunk1" in response.text
@@ -739,9 +736,7 @@ class TestFastAPIStreamingAdapter:
         client.get("/api/retrieve", headers={"X-Session-ID": "stream_leak"})
 
         # Stream leaked response
-        response = client.get(
-            "/api/generate", headers={"X-Session-ID": "stream_leak"}
-        )
+        response = client.get("/api/generate", headers={"X-Session-ID": "stream_leak"})
 
         assert "Security violation" in response.text
         assert "should not appear" not in response.text

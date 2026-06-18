@@ -121,4 +121,3 @@ class RAGuardLangChainCallback(BaseCallbackHandler):
                         raise CanaryTokenDetected(session_id=self.session_id)
         finally:
             self.middleware.clear_session(self.session_id)
-

@@ -14,6 +14,7 @@ def __getattr__(name: str) -> type:
         return RedisTokenStore
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+
 __version__ = "0.1.0"
 __all__ = [
     "CanaryMiddleware",

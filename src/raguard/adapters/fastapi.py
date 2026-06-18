@@ -137,26 +137,34 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
     def _inject_into_json(
         self, obj: dict[str, Any], token: str, depth: int = 0
     ) -> None:
-        """Recursively append canary token to string values in a dict."""
+        """Recursively inject canary token into string values in a dict.
+
+        Honours ``RAGuardConfig.token_wrapper`` and ``injection_position``
+        via ``CanaryMiddleware._format_injection`` so the JSON injection
+        path stays consistent with ``CanaryMiddleware.inject``.
+        """
         if depth >= self._MAX_INJECT_DEPTH:
             return
         for key, value in obj.items():
             if isinstance(value, str):
-                obj[key] = f"{value}\n\n[{token}]"
+                obj[key] = self.raguard._format_injection(value, token)
             elif isinstance(value, dict):
                 self._inject_into_json(value, token, depth + 1)
             elif isinstance(value, list):
                 self._inject_into_list(value, token, depth + 1)
 
-    def _inject_into_list(
-        self, lst: list[Any], token: str, depth: int = 0
-    ) -> None:
-        """Recursively append canary token to string values in a list."""
+    def _inject_into_list(self, lst: list[Any], token: str, depth: int = 0) -> None:
+        """Recursively inject canary token into string values in a list.
+
+        Honours ``RAGuardConfig.token_wrapper`` and ``injection_position``
+        via ``CanaryMiddleware._format_injection`` so the JSON injection
+        path stays consistent with ``CanaryMiddleware.inject``.
+        """
         if depth >= self._MAX_INJECT_DEPTH:
             return
         for i, item in enumerate(lst):
             if isinstance(item, str):
-                lst[i] = f"{item}\n\n[{token}]"
+                lst[i] = self.raguard._format_injection(item, token)
             elif isinstance(item, dict):
                 self._inject_into_json(item, token, depth + 1)
             elif isinstance(item, list):
