@@ -58,9 +58,7 @@ class TestSSRFProtection:
 
     def test_valid_https_url_allowed(self):
         """Valid public HTTPS URLs are allowed."""
-        config = RAGuardConfig(
-            alert_webhook_url="https://hooks.slack.com/services/xxx"
-        )
+        config = RAGuardConfig(alert_webhook_url="https://hooks.slack.com/services/xxx")
         middleware = CanaryMiddleware(config=config)
         token = middleware.generate_token("valid_test")
         leaked = f"Leaked: {token}"
@@ -74,9 +72,7 @@ class TestSSRFProtection:
 
     def test_dns_hostname_allowed(self):
         """DNS hostnames (non-IP) are allowed through."""
-        config = RAGuardConfig(
-            alert_webhook_url="https://my-webhook.example.com/alert"
-        )
+        config = RAGuardConfig(alert_webhook_url="https://my-webhook.example.com/alert")
         middleware = CanaryMiddleware(config=config)
         assert middleware._is_safe_webhook_target(
             "https://my-webhook.example.com/alert"
@@ -709,9 +705,7 @@ class TestJSONLogging:
             CanaryMiddleware(json_logging=True)
             raguard_logger = logging.getLogger("raguard")
             assert any(
-                isinstance(h.formatter, _JSONFormatter)
-                for h in raguard_logger.handlers
+                isinstance(h.formatter, _JSONFormatter) for h in raguard_logger.handlers
             )
         finally:
             core_module._JSON_LOGGING_CONFIGURED = original
-

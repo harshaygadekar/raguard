@@ -136,9 +136,7 @@ class InMemoryTokenStore:
             self._tokens[session_id].append((time.monotonic(), token))
             # Evict oldest tokens if over per-session limit
             if len(self._tokens[session_id]) > self._max_tokens:
-                self._tokens[session_id] = self._tokens[session_id][
-                    -self._max_tokens :
-                ]
+                self._tokens[session_id] = self._tokens[session_id][-self._max_tokens :]
             # Evict oldest session if over max-sessions limit
             if (
                 self._max_sessions is not None
@@ -147,9 +145,7 @@ class InMemoryTokenStore:
                 oldest_sid = min(
                     self._tokens,
                     key=lambda s: (
-                        self._tokens[s][0][0]
-                        if self._tokens[s]
-                        else float("inf")
+                        self._tokens[s][0][0] if self._tokens[s] else float("inf")
                     ),
                 )
                 if oldest_sid != session_id:

@@ -73,9 +73,7 @@ async def test_async_concurrent_inject_and_scan():
     async def worker(task_id: int) -> None:
         session_id = f"async_session_{task_id}"
         try:
-            result = await middleware.inject_async(
-                [f"async_doc_{task_id}"], session_id
-            )
+            result = await middleware.inject_async([f"async_doc_{task_id}"], session_id)
             assert isinstance(result, list)
             for chunk in result:
                 safe = await middleware.is_safe_async(chunk, session_id)
@@ -136,9 +134,7 @@ def test_session_isolation_under_concurrent_access():
         with lock:
             results[session_id] = tokens
 
-    threads = [
-        threading.Thread(target=worker, args=(i,)) for i in range(session_count)
-    ]
+    threads = [threading.Thread(target=worker, args=(i,)) for i in range(session_count)]
     for t in threads:
         t.start()
     for t in threads:
