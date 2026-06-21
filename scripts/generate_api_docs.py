@@ -17,11 +17,16 @@ def get_class_doc(cls):
     if cls.__doc__:
         doc += f"{inspect.cleandoc(cls.__doc__)}\n\n"
 
-    # Methods
+    # Methods (only those defined directly on this class, not inherited)
     methods = inspect.getmembers(cls, predicate=inspect.isfunction)
-    if methods:
+    own_methods = [
+        (name, func)
+        for name, func in methods
+        if func.__qualname__.split(".")[0] == cls.__name__
+    ]
+    if own_methods:
         doc += "### Methods\n\n"
-        for name, func in methods:
+        for name, func in own_methods:
             if name.startswith("_") and name != "__init__":
                 continue
             sig = inspect.signature(func)

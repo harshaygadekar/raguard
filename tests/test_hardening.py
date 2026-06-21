@@ -428,6 +428,18 @@ class TestConfigValidation:
         with pytest.raises(ValidationError, match="append.*prepend"):
             RAGuardConfig(injection_position="middle")
 
+    def test_max_scan_body_bytes_defaults_to_1mb(self):
+        config = RAGuardConfig()
+        assert config.max_scan_body_bytes == 1_048_576
+
+    def test_max_scan_body_bytes_zero_rejected(self):
+        with pytest.raises(ValidationError):
+            RAGuardConfig(max_scan_body_bytes=0)
+
+    def test_max_scan_body_bytes_none_disables_cap(self):
+        config = RAGuardConfig(max_scan_body_bytes=None)
+        assert config.max_scan_body_bytes is None
+
 
 # --- TokenStore ---
 

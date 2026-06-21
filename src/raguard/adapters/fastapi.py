@@ -26,6 +26,10 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
+class BodyTooLargeError(Exception):
+    """Raised when a response body exceeds the configured max_scan_body_bytes."""
+
+
 class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
     """FastAPI/Starlette middleware for RAG canary token injection and scanning.
 
@@ -189,7 +193,21 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
             return await self._handle_streaming_scan(response, session_id)
 
         # Non-streaming (or decode_response enabled): full-buffer scan
-        body = await self._read_response_body(response)
+        max_bytes = self.raguard.config.max_scan_body_bytes
+        try:
+            body = await self._read_response_body(response, max_bytes=max_bytes)
+        except BodyTooLargeError:
+            logger.warning(
+                "RAGuard: Response for session '%s' exceeded max_scan_body_bytes "
+                "(%s bytes); rejected without scanning",
+                session_id,
+                max_bytes,
+            )
+            self.raguard.clear_session(session_id)
+            return JSONResponse(
+                status_code=413,
+                content={"error": "Response body exceeds max_scan_body_bytes"},
+            )
 
         # Guard against abnormally large responses to prevent OOM
         max_bytes = self.raguard.config.max_scan_body_bytes
@@ -248,10 +266,12 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
             return response
 
         max_token_len = max(len(t) for t in tokens)
+        max_bytes = self.raguard.config.max_scan_body_bytes
 
         async def _scanning_generator() -> Any:
             buffer = ""
             detected = False
+            total_seen = 0
 
             async for raw_chunk in body_iterator:
                 if isinstance(raw_chunk, bytes):
@@ -260,6 +280,20 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
                     chunk_str = raw_chunk
                 else:
                     chunk_str = bytes(raw_chunk).decode("utf-8", errors="ignore")
+
+                total_seen += len(raw_chunk)
+                if max_bytes is not None and total_seen > max_bytes:
+                    logger.warning(
+                        "RAGuard: Streaming response for session '%s' exceeded "
+                        "max_scan_body_bytes (%s bytes); terminated without scanning",
+                        session_id,
+                        max_bytes,
+                    )
+                    self.raguard._metrics.record_scan_blocked()
+                    error_msg = "Response body exceeds max_scan_body_bytes"
+                    yield f'\ndata: {{"error": "{error_msg}"}}\n\n'
+                    self.raguard.clear_session(session_id)
+                    return
 
                 # Combine buffer overlap with current chunk for scanning
                 scan_window = buffer + chunk_str
@@ -303,18 +337,31 @@ class RAGuardFastAPIMiddleware(BaseHTTPMiddleware):
             media_type=response.media_type,
         )
 
-    async def _read_response_body(self, response: Response) -> bytes:
-        """Read response body as bytes, handling StreamingResponse."""
+    async def _read_response_body(
+        self, response: Response, max_bytes: int | None = None
+    ) -> bytes:
+        """Read response body as bytes, handling StreamingResponse.
+
+        If ``max_bytes`` is set and the body exceeds it, raises ``BodyTooLargeError``
+        to let the caller short-circuit (e.g. return 413) instead of OOMing.
+        """
         body_iterator = getattr(response, "body_iterator", None)
         if body_iterator is None:
-            body = getattr(response, "body", b"")
-            return cast(bytes, body)
+            body = cast(bytes, getattr(response, "body", b""))
+            if max_bytes is not None and len(body) > max_bytes:
+                raise BodyTooLargeError
+            return body
         body_chunks: list[bytes] = []
+        total = 0
         async for chunk in body_iterator:
             if isinstance(chunk, str):
-                body_chunks.append(chunk.encode("utf-8"))
+                chunk = chunk.encode("utf-8")
             else:
-                body_chunks.append(chunk)
+                chunk = cast(bytes, chunk)
+            body_chunks.append(chunk)
+            total += len(chunk)
+            if max_bytes is not None and total > max_bytes:
+                raise BodyTooLargeError
         return b"".join(body_chunks)
 
     def _rebuild_response(self, response: Response, body: bytes) -> Response:

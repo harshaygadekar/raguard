@@ -105,14 +105,15 @@ class RAGuardConfig(BaseSettings):
             "Format string for wrapping the token. Must contain '{token}' placeholder."
         ),
     )
-
-    max_scan_body_bytes: int = Field(
+    max_scan_body_bytes: int | None = Field(
         default=1_048_576,
-        ge=1024,
+        ge=1,
         description=(
-            "Maximum response body size (bytes) the FastAPI adapter will buffer "
-            "for scanning. Responses exceeding this are passed through unscanned. "
-            "Default: 1MB."
+            "FastAPI scan-path response body size cap in bytes. Responses "
+            "exceeding this are rejected without scanning (non-streaming: 413; "
+            "streaming: SSE error frame) — fail-open for detection, protects the "
+            "process from OOM. Set to None to disable. Env var: "
+            "RAGUARD_MAX_SCAN_BODY_BYTES."
         ),
     )
 

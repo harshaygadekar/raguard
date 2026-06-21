@@ -843,3 +843,150 @@ class TestFastAPIStreamingAdapter:
 
         # Safe content should pass through
         assert response.status_code == 200
+
+
+# ============================================================================
+# TestFastAPIBodySizeCap
+# ============================================================================
+
+
+class TestFastAPIBodySizeCap:
+    """Tests for the max_scan_body_bytes OOM guardrail."""
+
+    def test_scan_path_rejects_oversize_body(self):
+        """413 returned when a non-streaming scan response exceeds the cap."""
+        from starlette.applications import Starlette
+        from starlette.responses import JSONResponse
+        from starlette.routing import Route
+        from starlette.testclient import TestClient
+
+        from src.raguard.adapters.fastapi import RAGuardFastAPIMiddleware
+
+        middleware_instance = CanaryMiddleware(max_scan_body_bytes=128)
+
+        async def retrieve(request):
+            return JSONResponse({"doc": "Secret"})
+
+        async def generate(request):
+            # Body well over the 128-byte cap
+            return JSONResponse({"response": "x" * 4096})
+
+        app = Starlette(
+            routes=[
+                Route("/api/retrieve", retrieve),
+                Route("/api/generate", generate),
+            ]
+        )
+        app.add_middleware(
+            RAGuardFastAPIMiddleware,
+            middleware=middleware_instance,
+            inject_paths=[r"/api/retrieve"],
+            scan_paths=[r"/api/generate"],
+        )
+
+        client = TestClient(app)
+        client.get("/api/retrieve", headers={"X-Session-ID": "cap_session"})
+        response = client.get("/api/generate", headers={"X-Session-ID": "cap_session"})
+
+        assert response.status_code == 413
+        assert "exceeds max_scan_body_bytes" in response.json()["error"]
+
+    def test_scan_path_allows_body_under_cap(self):
+        """Bodies under the cap pass through normally."""
+        from starlette.applications import Starlette
+        from starlette.responses import JSONResponse
+        from starlette.routing import Route
+        from starlette.testclient import TestClient
+
+        from src.raguard.adapters.fastapi import RAGuardFastAPIMiddleware
+
+        middleware_instance = CanaryMiddleware(max_scan_body_bytes=8192)
+
+        async def retrieve(request):
+            return JSONResponse({"doc": "Secret"})
+
+        async def generate(request):
+            return JSONResponse({"response": "safe small response"})
+
+        app = Starlette(
+            routes=[
+                Route("/api/retrieve", retrieve),
+                Route("/api/generate", generate),
+            ]
+        )
+        app.add_middleware(
+            RAGuardFastAPIMiddleware,
+            middleware=middleware_instance,
+            inject_paths=[r"/api/retrieve"],
+            scan_paths=[r"/api/generate"],
+        )
+
+        client = TestClient(app)
+        client.get("/api/retrieve", headers={"X-Session-ID": "under_cap"})
+        response = client.get("/api/generate", headers={"X-Session-ID": "under_cap"})
+
+        assert response.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_read_response_body_raises_on_oversize_iterator(self):
+        """_read_response_body raises BodyTooLargeError for an oversize iterator."""
+        from starlette.responses import StreamingResponse
+
+        from src.raguard.adapters.fastapi import (
+            BodyTooLargeError,
+            RAGuardFastAPIMiddleware,
+        )
+
+        middleware = RAGuardFastAPIMiddleware(app=None)
+
+        async def stream():
+            yield b"x" * 256
+
+        response = StreamingResponse(stream())
+        with pytest.raises(BodyTooLargeError):
+            await middleware._read_response_body(response, max_bytes=128)
+
+    def test_streaming_scan_emits_error_on_oversize(self):
+        """Streaming response over the cap emits an SSE error frame and stops."""
+        from starlette.applications import Starlette
+        from starlette.responses import StreamingResponse
+        from starlette.routing import Route
+        from starlette.testclient import TestClient
+
+        from src.raguard.adapters.fastapi import RAGuardFastAPIMiddleware
+
+        middleware_instance = CanaryMiddleware(max_scan_body_bytes=128)
+
+        async def retrieve(request):
+            from starlette.responses import JSONResponse
+
+            return JSONResponse({"doc": "Secret"})
+
+        async def generate(request):
+            async def stream():
+                # First chunk under cap, second pushes over
+                yield "data: small\n\n"
+                yield "data: " + ("x" * 4096) + "\n\n"
+                yield "data: should not appear\n\n"
+
+            return StreamingResponse(stream(), media_type="text/event-stream")
+
+        app = Starlette(
+            routes=[
+                Route("/api/retrieve", retrieve),
+                Route("/api/generate", generate),
+            ]
+        )
+        app.add_middleware(
+            RAGuardFastAPIMiddleware,
+            middleware=middleware_instance,
+            inject_paths=[r"/api/retrieve"],
+            scan_paths=[r"/api/generate"],
+        )
+
+        client = TestClient(app)
+        client.get("/api/retrieve", headers={"X-Session-ID": "stream_cap"})
+        response = client.get("/api/generate", headers={"X-Session-ID": "stream_cap"})
+
+        assert "exceeds max_scan_body_bytes" in response.text
+        assert "should not appear" not in response.text

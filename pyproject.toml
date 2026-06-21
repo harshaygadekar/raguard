@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "raguard"
-version = "0.1.0"
+version = "1.0.0"
 description = "Deterministic security middleware for RAG applications to prevent context exfiltration via indirect prompt injection."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,7 +36,7 @@ Issues = "https://github.com/harshaygadekar/raguard/issues"
 Changelog = "https://github.com/harshaygadekar/raguard/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-langchain = ["langchain-core>=0.1.0,<1.0"]
+langchain = ["langchain-core>=0.1.0"]
 llamaindex = ["llama-index>=0.10.0,<1.0"]
 fastapi = ["fastapi>=0.100.0"]
 redis = ["redis>=4.5.0"]
@@ -48,8 +48,8 @@ dev = [
     "hypothesis>=6.0.0",
     "ruff>=0.1.0",
     "mypy>=1.5.0",
-    "langchain-core>=0.1.0,<1.0",
-    "langchain>=0.1.0,<1.0",
+    "langchain-core>=0.1.0",
+    "langchain>=0.1.0",
     "llama-index>=0.10.0,<1.0",
     "fastapi>=0.100.0",
     "fakeredis>=2.21.0",
