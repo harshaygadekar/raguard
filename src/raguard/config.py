@@ -105,6 +105,7 @@ class RAGuardConfig(BaseSettings):
             "Format string for wrapping the token. Must contain '{token}' placeholder."
         ),
     )
+
     max_scan_body_bytes: int | None = Field(
         default=1_048_576,
         ge=1,

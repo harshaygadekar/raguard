@@ -428,18 +428,6 @@ class TestConfigValidation:
         with pytest.raises(ValidationError, match="append.*prepend"):
             RAGuardConfig(injection_position="middle")
 
-    def test_max_scan_body_bytes_defaults_to_1mb(self):
-        config = RAGuardConfig()
-        assert config.max_scan_body_bytes == 1_048_576
-
-    def test_max_scan_body_bytes_zero_rejected(self):
-        with pytest.raises(ValidationError):
-            RAGuardConfig(max_scan_body_bytes=0)
-
-    def test_max_scan_body_bytes_none_disables_cap(self):
-        config = RAGuardConfig(max_scan_body_bytes=None)
-        assert config.max_scan_body_bytes is None
-
 
 # --- TokenStore ---
 
@@ -657,8 +645,14 @@ class TestMaxScanBodyBytes:
         assert config.max_scan_body_bytes == 2_000_000
 
     def test_minimum_enforced(self):
+        # ge=1: zero rejected, small positive values accepted
         with pytest.raises(ValidationError):
-            RAGuardConfig(max_scan_body_bytes=512)  # type: ignore[arg-type]
+            RAGuardConfig(max_scan_body_bytes=0)  # type: ignore[arg-type]
+        assert RAGuardConfig(max_scan_body_bytes=512).max_scan_body_bytes == 512
+
+    def test_none_disables_cap(self):
+        config = RAGuardConfig(max_scan_body_bytes=None)
+        assert config.max_scan_body_bytes is None
 
     def test_env_var_override(self, monkeypatch):
         monkeypatch.setenv("RAGUARD_MAX_SCAN_BODY_BYTES", "5000")

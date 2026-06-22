@@ -576,7 +576,7 @@ class TestFastAPIAdapter:
         assert "[" in data["outer"]["inner_list"][1]["deep_dict"]
 
     def test_scan_path_exceeds_max_scan_body_bytes(self) -> None:
-        """Responses exceeding max_scan_body_bytes bypass scanning and pass through."""
+        """Responses exceeding max_scan_body_bytes are rejected with 413."""
         from typing import Any
 
         from starlette.applications import Starlette
@@ -619,13 +619,13 @@ class TestFastAPIAdapter:
         # First inject tokens
         client.get("/api/retrieve", headers={"X-Session-ID": "test_session_large"})
 
-        # Try to leak - should pass through instead of 403 because it's too large
+        # Oversize body is rejected without scanning — 413, not 403/200
         response = client.get(
             "/api/generate", headers={"X-Session-ID": "test_session_large"}
         )
 
-        assert response.status_code == 200
-        assert "Leaked:" in response.json()["response"]
+        assert response.status_code == 413
+        assert "exceeds max_scan_body_bytes" in response.json()["error"]
 
         # Verify session is cleaned up
         assert not middleware_instance._store.get_tokens("test_session_large")
@@ -852,44 +852,6 @@ class TestFastAPIStreamingAdapter:
 
 class TestFastAPIBodySizeCap:
     """Tests for the max_scan_body_bytes OOM guardrail."""
-
-    def test_scan_path_rejects_oversize_body(self):
-        """413 returned when a non-streaming scan response exceeds the cap."""
-        from starlette.applications import Starlette
-        from starlette.responses import JSONResponse
-        from starlette.routing import Route
-        from starlette.testclient import TestClient
-
-        from src.raguard.adapters.fastapi import RAGuardFastAPIMiddleware
-
-        middleware_instance = CanaryMiddleware(max_scan_body_bytes=128)
-
-        async def retrieve(request):
-            return JSONResponse({"doc": "Secret"})
-
-        async def generate(request):
-            # Body well over the 128-byte cap
-            return JSONResponse({"response": "x" * 4096})
-
-        app = Starlette(
-            routes=[
-                Route("/api/retrieve", retrieve),
-                Route("/api/generate", generate),
-            ]
-        )
-        app.add_middleware(
-            RAGuardFastAPIMiddleware,
-            middleware=middleware_instance,
-            inject_paths=[r"/api/retrieve"],
-            scan_paths=[r"/api/generate"],
-        )
-
-        client = TestClient(app)
-        client.get("/api/retrieve", headers={"X-Session-ID": "cap_session"})
-        response = client.get("/api/generate", headers={"X-Session-ID": "cap_session"})
-
-        assert response.status_code == 413
-        assert "exceeds max_scan_body_bytes" in response.json()["error"]
 
     def test_scan_path_allows_body_under_cap(self):
         """Bodies under the cap pass through normally."""
