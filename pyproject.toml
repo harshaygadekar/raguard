@@ -74,7 +74,7 @@ warn_unused_configs = true
 # ponytail: numpy is transitive (langchain/llama-index), not imported in src/;
 # its PEP 695 stubs break mypy. Skip until mypy ships full PEP 695 support.
 [[tool.mypy.overrides]]
-module = "numpy.*"
+module = ["numpy", "numpy.*"]
 follow_imports = "skip"
 
 [tool.pytest.ini_options]
