@@ -47,7 +47,7 @@ dev = [
     "pytest-benchmark>=4.0.0",
     "hypothesis>=6.0.0",
     "ruff>=0.1.0",
-    "mypy>=1.5.0",
+    "mypy>=1.12.0",
     "langchain-core>=0.1.0",
     "langchain>=0.1.0",
     "llama-index>=0.10.0,<1.0",
@@ -70,12 +70,6 @@ explicit_package_bases = true
 strict = true
 warn_return_any = true
 warn_unused_configs = true
-
-# ponytail: numpy is transitive (langchain/llama-index), not imported in src/;
-# its PEP 695 stubs break mypy. Skip until mypy ships full PEP 695 support.
-[[tool.mypy.overrides]]
-module = ["numpy", "numpy.*"]
-follow_imports = "skip"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
