@@ -10,6 +10,20 @@ RAGuard protects Retrieval-Augmented Generation (RAG) systems from context exfil
 
 ---
 
+## 📺 Live Interactive Playground & Demo
+
+Try the interactive security simulation:
+
+![RAGuard Live Playground Demo](docs/assets/demo.webp)
+
+To run the interactive playground locally:
+```bash
+python examples/playground.py
+```
+Open your browser at `http://127.0.0.1:8000` to experiment with safe and adversarial prompts in real time.
+
+---
+
 ## 🚀 Key Features
 
 *   **Deterministic Detection:** Guarantees 100% detection of token-level exfiltration when the token appears in the LLM's output.
