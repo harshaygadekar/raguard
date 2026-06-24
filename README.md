@@ -14,7 +14,7 @@ RAGuard protects Retrieval-Augmented Generation (RAG) systems from context exfil
 
 Try the interactive security simulation:
 
-![RAGuard Live Playground Demo](docs/assets/demo.webp)
+Coming soon!!
 
 To run the interactive playground locally:
 ```bash
