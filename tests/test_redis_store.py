@@ -141,5 +141,5 @@ class TestRedisTokenStoreImportError:
         import src.raguard.redis_store as mod
 
         monkeypatch.setattr(mod, "redis", None)
-        with pytest.raises(ImportError, match="raguard\\[redis\\]"):
+        with pytest.raises(ImportError, match="raguard-security\\[redis\\]"):
             RedisTokenStore()

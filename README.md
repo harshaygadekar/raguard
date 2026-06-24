@@ -38,19 +38,19 @@ Open your browser at `http://127.0.0.1:8000` to experiment with safe and adversa
 
 Install the core package:
 ```bash
-pip install raguard
+pip install raguard-security
 ```
 
 Or install with support for your preferred framework:
 ```bash
 # LangChain integration
-pip install "raguard[langchain]"
+pip install "raguard-security[langchain]"
 
 # LlamaIndex integration
-pip install "raguard[llamaindex]"
+pip install "raguard-security[llamaindex]"
 
 # FastAPI integration
-pip install "raguard[fastapi]"
+pip install "raguard-security[fastapi]"
 ```
 
 > **⚠️ Production Deployment Note:** The default `InMemoryTokenStore` is single-process only. If you run multiple workers (e.g., Gunicorn, Kubernetes pods), tokens stored in one worker's memory are invisible to others. For multi-worker deployments, use `RedisTokenStore`:

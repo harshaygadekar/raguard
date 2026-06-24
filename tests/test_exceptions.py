@@ -31,7 +31,7 @@ def test_raguard_import_error_message():
     error_msg = str(exc)
     assert "langchain" in error_msg
     assert "pip install" in error_msg
-    assert "raguard[langchain]" in error_msg
+    assert "raguard-security[langchain]" in error_msg
 
 
 def test_raguard_import_error_is_import_error():

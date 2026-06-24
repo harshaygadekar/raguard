@@ -20,5 +20,5 @@ class RAGuardImportError(ImportError):
         self.adapter_name = adapter_name
         super().__init__(
             f"The '{adapter_name}' adapter requires the '{package_name}' package. "
-            f'Install it with: pip install "raguard[{extra_name}]"'
+            f'Install it with: pip install "raguard-security[{extra_name}]"'
         )

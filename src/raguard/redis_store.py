@@ -5,7 +5,7 @@ canary tokens in Redis instead of process-local memory.
 
 Requires the ``redis`` package::
 
-    pip install "raguard[redis]"
+    pip install "raguard-security[redis]"
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ class RedisTokenStore:
         if r is None:
             raise ImportError(
                 "The RedisTokenStore requires the 'redis' package. "
-                'Install it with: pip install "raguard[redis]"'
+                'Install it with: pip install "raguard-security[redis]"'
             )
         if redis_client is not None:
             self._redis: Any = redis_client

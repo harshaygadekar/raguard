@@ -1,9 +1,9 @@
 """Framework adapters for RAGuard.
 
 Each adapter requires its respective optional dependency:
-    pip install "raguard[langchain]"
-    pip install "raguard[llamaindex]"
-    pip install "raguard[fastapi]"
+    pip install "raguard-security[langchain]"
+    pip install "raguard-security[llamaindex]"
+    pip install "raguard-security[fastapi]"
 """
 
 from __future__ import annotations

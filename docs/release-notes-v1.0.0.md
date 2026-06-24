@@ -17,13 +17,13 @@ RAGuard protects Retrieval-Augmented Generation (RAG) systems from context exfil
 ## Installation
 
 ```bash
-pip install raguard
+pip install raguard-security
 
 # With framework support:
-pip install "raguard[langchain]"
-pip install "raguard[llamaindex]"
-pip install "raguard[fastapi]"
-pip install "raguard[redis]"
+pip install "raguard-security[langchain]"
+pip install "raguard-security[llamaindex]"
+pip install "raguard-security[fastapi]"
+pip install "raguard-security[redis]"
 ```
 
 ## Quick Start
@@ -55,7 +55,7 @@ if not middleware.is_safe("session_123", llm_response):
 ## Links
 
 - [Documentation](https://github.com/harshaygadekar/raguard#readme)
-- [PyPI](https://pypi.org/project/raguard/)
+- [PyPI](https://pypi.org/project/raguard-security/)
 - [Changelog](https://github.com/harshaygadekar/raguard/blob/main/CHANGELOG.md)
 - [Contributing](https://github.com/harshaygadekar/raguard/blob/main/CONTRIBUTING.md)
 - [Security Policy](https://github.com/harshaygadekar/raguard/blob/main/SECURITY.md)

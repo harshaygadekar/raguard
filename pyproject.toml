@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "raguard"
+name = "raguard-security"
 version = "1.0.0"
 description = "Deterministic security middleware for RAG applications to prevent context exfiltration via indirect prompt injection."
 readme = "README.md"
@@ -89,3 +89,6 @@ warn_unused_configs = true
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "--cov=src/raguard --cov-report=term-missing --cov-fail-under=85"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/raguard"]

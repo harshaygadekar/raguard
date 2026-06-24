@@ -6,7 +6,7 @@ Kubernetes pods), provide a custom TokenStore backed by Redis or similar.
 
 Scaling guidance for InMemoryTokenStore:
   - Suitable for single-process deployments and up to ~50k concurrent sessions.
-  - For multi-worker setups, use RedisTokenStore (``pip install "raguard[redis]"``).
+  - For multi-worker, use RedisTokenStore (``pip install "raguard-security[redis]"``).
   - Call ``clear_session()`` after each request cycle to bound memory usage.
 """
 
