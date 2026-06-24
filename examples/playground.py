@@ -43,18 +43,24 @@ HTML_CONTENT = """<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f5f5f7;
-            --card-bg: #ffffff;
-            --card-border: #e8e8ed;
-            --input-border: #d2d2d7;
-            --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
-            --accent-black: #1d1d1f;
-            --accent-gray: #48484a;
-            --accent-green: #2d7a47;
-            --accent-red: #b92d2d;
-            --accent-purple: #722db9;
-            --glow-shadow: rgba(0, 0, 0, 0.04);
+            --bg-color: #0d0f12;
+            --card-bg: rgba(20, 24, 33, 0.65);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --input-bg: rgba(13, 15, 18, 0.8);
+            --input-border: rgba(255, 255, 255, 0.08);
+            --input-focus: #6366f1;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-black: #ffffff;
+            --accent-gray: #374151;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            --accent-purple: #a78bfa;
+            --glow-shadow: rgba(0, 0, 0, 0.4);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --glass-blur: blur(12px);
         }
 
         * {
@@ -66,6 +72,9 @@ HTML_CONTENT = """<!DOCTYPE html>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 50%);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -75,13 +84,13 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         header {
-            padding: 1.25rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--card-border);
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: saturate(180%) blur(20px);
+            background-color: rgba(13, 15, 18, 0.6);
+            backdrop-filter: var(--glass-blur);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -94,32 +103,36 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         .logo-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--accent-black);
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--input-focus), var(--accent-purple));
             color: #ffffff;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .logo-text {
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             letter-spacing: -0.5px;
             color: var(--text-primary);
+            background: linear-gradient(to right, #ffffff, #d1d5db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .badge-v1 {
-            background-color: #f5f5f7;
+            background-color: rgba(255, 255, 255, 0.05);
             color: var(--text-secondary);
             border: 1px solid var(--card-border);
             padding: 0.15rem 0.5rem;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 500;
             margin-left: 0.5rem;
         }
@@ -129,28 +142,29 @@ HTML_CONTENT = """<!DOCTYPE html>
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            padding: 2.5rem 1.5rem;
+            padding: 2rem 1.5rem;
             display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 2.5rem;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
         }
 
         @media (max-width: 950px) {
             main {
                 grid-template-columns: 1fr;
-                gap: 2rem;
+                gap: 1.5rem;
             }
         }
 
         .panel {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            box-shadow: 0 4px 20px var(--glow-shadow);
+            box-shadow: 0 10px 30px var(--glow-shadow);
             align-self: start;
         }
 
@@ -159,7 +173,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             font-weight: 600;
             letter-spacing: -0.2px;
             border-bottom: 1px solid var(--card-border);
-            padding-bottom: 0.75rem;
+            padding-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -172,7 +186,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-secondary);
             font-weight: 600;
             text-transform: uppercase;
@@ -180,19 +194,20 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         textarea, select, input {
-            background-color: #ffffff;
+            background-color: var(--input-bg);
             border: 1px solid var(--input-border);
-            border-radius: 8px;
-            padding: 0.65rem 0.75rem;
+            border-radius: var(--radius-md);
+            padding: 0.75rem 0.85rem;
             color: var(--text-primary);
             font-family: inherit;
             font-size: 0.9rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
         }
 
         textarea:focus, select:focus, input:focus {
             outline: none;
-            border-color: var(--accent-black);
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
 
         textarea {
@@ -203,17 +218,17 @@ HTML_CONTENT = """<!DOCTYPE html>
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #f5f5f7;
-            padding: 0.75rem;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
             border: 1px solid var(--card-border);
         }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 40px;
-            height: 22px;
+            width: 44px;
+            height: 24px;
         }
 
         .switch input {
@@ -229,38 +244,37 @@ HTML_CONTENT = """<!DOCTYPE html>
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #e5e5ea;
-            transition: .3s;
-            border-radius: 22px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .25s ease;
+            border-radius: 24px;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 16px;
-            width: 16px;
+            height: 18px;
+            width: 18px;
             left: 3px;
             bottom: 3px;
-            background-color: white;
-            transition: .3s;
+            background-color: #ffffff;
+            transition: .25s ease;
             border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
         input:checked + .slider {
-            background-color: var(--accent-black);
+            background-color: var(--input-focus);
         }
 
         input:checked + .slider:before {
-            transform: translateX(18px);
+            transform: translateX(20px);
         }
 
         /* Segmented Control for LLM Safety */
         .segmented-control {
             display: flex;
-            background-color: #f5f5f7;
-            padding: 2px;
-            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 3px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--card-border);
         }
 
@@ -271,17 +285,16 @@ HTML_CONTENT = """<!DOCTYPE html>
             color: var(--text-secondary);
             font-size: 0.8rem;
             font-weight: 500;
-            padding: 0.5rem;
-            border-radius: 6px;
+            padding: 0.6rem;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             text-align: center;
         }
 
         .segment-btn.active {
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
             color: var(--text-primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             font-weight: 600;
         }
 
@@ -290,7 +303,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             display: flex;
             flex-wrap: wrap;
             gap: 0.4rem;
-            margin-top: 0.25rem;
+            margin-top: 0.35rem;
         }
 
         .preset-pill {
@@ -298,46 +311,49 @@ HTML_CONTENT = """<!DOCTYPE html>
             border: 1px solid var(--input-border);
             color: var(--text-secondary);
             font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 20px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .preset-pill:hover {
-            border-color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.3);
             color: var(--text-primary);
         }
 
         .preset-pill.active {
-            background-color: var(--accent-black);
-            color: #ffffff;
-            border-color: var(--accent-black);
+            background-color: rgba(99, 102, 241, 0.15);
+            color: var(--input-focus);
+            border-color: var(--input-focus);
+            font-weight: 500;
         }
 
         .btn-submit {
-            background-color: var(--accent-black);
+            background: linear-gradient(135deg, var(--input-focus), #4f46e5);
             color: #ffffff;
             border: none;
-            padding: 0.85rem;
-            border-radius: 8px;
+            padding: 0.9rem;
+            border-radius: var(--radius-md);
             font-weight: 600;
             font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
         }
 
         .btn-submit:hover {
-            background-color: var(--accent-gray);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
         }
 
         .btn-submit:active {
-            transform: scale(0.98);
+            transform: translateY(1px);
         }
 
         .workspace {
@@ -349,13 +365,18 @@ HTML_CONTENT = """<!DOCTYPE html>
         .step-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            box-shadow: 0 4px 15px var(--glow-shadow);
-            transition: transform 0.2s;
+            gap: 0.85rem;
+            box-shadow: 0 8px 24px var(--glow-shadow);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .step-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .step-header {
@@ -363,22 +384,23 @@ HTML_CONTENT = """<!DOCTYPE html>
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 1.05rem;
             letter-spacing: -0.2px;
             color: var(--text-primary);
         }
 
         .step-number {
-            background-color: #f5f5f7;
+            background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
-            width: 22px;
-            height: 22px;
+            width: 26px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             font-size: 0.75rem;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .step-content {
@@ -389,19 +411,19 @@ HTML_CONTENT = """<!DOCTYPE html>
         .code-block {
             font-family: 'Fira Code', 'SF Mono', Menlo, monospace;
             font-size: 0.85rem;
-            background-color: #f5f5f7;
-            border: 1px solid var(--card-border);
-            border-radius: 6px;
-            padding: 0.85rem;
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
             overflow-x: auto;
             white-space: pre-wrap;
-            color: #333333;
-            line-height: 1.5;
+            color: #e5e7eb;
+            line-height: 1.6;
         }
 
         .canary-highlight {
-            background-color: #fdf2f2;
-            border: 1px solid #f8d7d7;
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 4px;
             padding: 0.1rem 0.3rem;
             color: var(--accent-red);
@@ -410,18 +432,19 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         .canary-detect-badge {
             background-color: var(--accent-red);
-            color: white;
-            padding: 0.15rem 0.35rem;
-            border-radius: 3px;
-            font-size: 0.7rem;
+            color: #ffffff;
+            padding: 0.15rem 0.45rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
             font-weight: 700;
-            margin-left: 0.4rem;
+            margin-left: 0.5rem;
             vertical-align: middle;
+            text-transform: uppercase;
         }
 
         .stealth-highlight {
-            background-color: #f0ecf7;
-            border: 1px dashed #d9cde8;
+            background-color: rgba(167, 139, 250, 0.15);
+            border: 1px dashed rgba(167, 139, 250, 0.3);
             border-radius: 4px;
             padding: 0.1rem 0.3rem;
             color: var(--accent-purple);
@@ -432,36 +455,36 @@ HTML_CONTENT = """<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: 12px;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
             font-weight: 600;
             font-size: 0.75rem;
             text-transform: uppercase;
         }
 
         .status-pending {
-            background-color: #f5f5f7;
+            background-color: rgba(255, 255, 255, 0.03);
             color: var(--text-secondary);
             border: 1px solid var(--card-border);
         }
 
         .status-running {
-            background-color: #e8f0fe;
-            color: #1a73e8;
-            border: 1px solid #d2e3fc;
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
             animation: pulse 1.5s infinite;
         }
 
         .status-success {
-            background-color: #eaf5ea;
+            background-color: rgba(16, 185, 129, 0.12);
             color: var(--accent-green);
-            border: 1px solid #cce2cc;
+            border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
         .status-blocked {
-            background-color: #fdf2f2;
+            background-color: rgba(239, 68, 68, 0.12);
             color: var(--accent-red);
-            border: 1px solid #f8d7d7;
+            border: 1px solid rgba(239, 68, 68, 0.25);
             animation: shake 0.4s;
         }
 
@@ -478,15 +501,17 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         .alert-box {
-            background-color: #fdf2f2;
-            border: 1px solid #f8d7d7;
-            border-radius: 8px;
-            padding: 1rem;
+            background-color: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
             color: var(--text-primary);
             display: none;
             flex-direction: column;
-            gap: 0.4rem;
-            animation: slideDown 0.2s ease-out;
+            gap: 0.5rem;
+            animation: slideDown 0.25s ease-out;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
         @keyframes slideDown {
@@ -498,28 +523,35 @@ HTML_CONTENT = """<!DOCTYPE html>
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 0.75rem;
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
         }
 
         .metric-card {
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--card-border);
-            padding: 0.6rem;
-            border-radius: 6px;
+            padding: 0.75rem 0.6rem;
+            border-radius: var(--radius-md);
             text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .metric-value {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: var(--text-primary);
         }
 
         .metric-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: var(--text-secondary);
             text-transform: uppercase;
-            margin-top: 0.1rem;
+            margin-top: 0.25rem;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
